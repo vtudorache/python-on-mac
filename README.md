@@ -24,22 +24,28 @@ InstalledDir: /Library/Developer/CommandLineTools/usr/bin
 
 If no toolchain is installed, the command above will trigger a dialog requiring the installation of Xcode or Command Line Tools. Alternatively, the tools can be installed with the command:
 
+```
 xcode-select --install
+```
 
 If the tools are already installed, the following message will show:
 
+```
 xcode-select: error: command line tools are already installed, use "Software Update" to install updates
+```
 
 Once the compilation tools are installed, prepare the environment for building.
 
-Step 2. Preparing the environment
+## Step 2. Preparing the environment
 
 For speed reasons (and for protecting the SSD), the author of this text does the build on a RAM disk. A size of 1.5 GB will be enough.
 The remaining memory for the OS and applications must be at least 2 GB, so for those not having enough RAM installed (4 GB at least), a directory on disk must be used instead. The size of the RAM disk can't be reduced too much, otherwise several Python tests will fail (at the testing phase).
 
 If there's enough space for a RAM disk, the following command will create a 1.5 GB RAM disk and mount it at /Volumes/BUILD (the icon of the mounted volume will show on desktop):
 
-diskutil eraseVolume HFS+ BUILD `hdiutil attach -nomount ram://3145728`
+```
+diskutil eraseVolume HFS+ BUILD $(hdiutil attach -nomount ram://3145728)
+```
 
 Otherwise, if there's not enough room in RAM, create a temporary folder:
 
