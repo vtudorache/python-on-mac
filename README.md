@@ -88,96 +88,96 @@ Change to the sources directory:
 cd $WORK/src
 ```
 Download Tcl/Tk from [https://downloads.sourceforge.net/tcl](https://downloads.sourceforge.net/tcl) using the curl command available by default on macOS. The download and extract steps can be performed in a single operation:
-
+```
 curl -L https://downloads.sourceforge.net/tcl/tcl8.6.8-src.tar.gz | tar -xf -
 curl -L https://downloads.sourceforge.net/tcl/tk8.6.8-src.tar.gz | tar -xf -
-
+```
 Observe the versioning of Tcl/Tk archive names: tcl or tk followed by the version and then followed by -src.tar.gz (to download 8.5.18, for example, the archive names will be tcl8.5.18-src.tar.gz and tk8.5.18-src.tar.gz).
-In the end, the subdirectories tcl8.6.8 and tk8.6.8 (the numbers may change according to the downloaded version) appear in the $WORK/src directory.
+In the end, the subdirectories tcl8.6.8 and tk8.6.8 (the numbers may change according to the downloaded version) appear in the `$WORK/src` directory.
 Pay attention at download errors. If any error occurs, the source subdirectories will be partial and the download procedure must be done again.
 
 When building for 64 bits, the configuration option --enable-64bit can be added to Tcl and Tk, enabling large integers to be used.
 Configure and build Tcl:
-
+```
 cd tcl8.6.8/unix
 ./configure --enable-64bit --enable-dtrace --enable-framework --enable-threads --mandir=/usr/local/share/man --prefix=/usr/local --with-encoding="utf-8"
 make -j2 && sudo make NATIVE_TCLSH=/usr/local/bin/tclsh8.6 install
 sudo mv /usr/local/bin/tclsh8.6 /Library/Frameworks/Tcl.framework/Versions/8.6
 sudo ln -sv ../../../Library/Frameworks/Tcl.framework/Versions/8.6/tclsh8.6 /usr/local/bin
 cd $WORK/src
-
+```
 When not building for 64 bits, the option --enable-64bit must be removed. The NATIVE_TCLSH given with the installation command shows the installer which is the tclsh to use when building documentation. If this variable isn't set and no Tcl 8.6 is installed on the system, the HTML documentation step will fail.
-Move the tclsh8.6 binary from /usr/local/bin to /Library/Frameworks/Tcl.framework/Versions/8.6 and create a symbolic link to it in /usr/local/bin for consistency with system installed Tcl.
+The last commands move the tclsh8.6 binary from `/usr/local/bin` to `/Library/Frameworks/Tcl.framework/Versions/8.6` and create a symbolic link to it in `/usr/local/bin` for consistency with system installed Tcl.
 Configure and build Tk:
-
+```
 cd tk8.6.8/unix
 ./configure --enable-64bit --enable-aqua --enable-framework --enable-threads --mandir=/usr/local/share/man --prefix=/usr/local --without-x
 make -j2 && sudo make install
 cd $WORK/src
-
+```
 There is no need of NATIVE_TCLSH, as there's certainly a tclsh8.6 previously installed.
 
 Clean the work space:
-
+```
 rm -rf tcl* tk*
-
-Step 4. Install XZ (LZMA) headers
+```
+## Step 4. Install XZ (LZMA) headers
 
 The LZMA library is already available on the system, but there are no C headers available. Download an API-compatible XZ and install headers with the $WORK prefix.
-
+```
 curl -L https://sourceforge.net/projects/lzmautils/files/xz-5.0.0.tar.gz | tar -xf -
 cd xz-5.0.0
 ./configure --disable-nls --prefix=$WORK
 cd src/liblzma/api
 make install
 cd $WORK/src
-
+```
 Observe that only the C headers are installed. Clean the work space:
-
+```
 rm -rf xz*
-
-Step 5. Install SSL headers
+```
+## Step 5. Install SSL headers
 
 This step must be skipped by those installing Python 3.7.X because a full SSL install is needed in this case (the SSL library available on macOS is too old). For Python 3.6.X and lower versions, the case of LZMA repeats. The libraries are available, but no C headers are found.
-Pay attention when compiling for older OS versions, there could be old versions of OpenSSL instead of LibreSSL installed on the target system. In that case, one must download https://www.openssl.org/source/old/1.0.2/openssl-1.0.2.tar.gz and follow the steps given below for older SSL versions. Using those versions is not recommended.
+Pay attention when compiling for older OS versions, there could be old versions of OpenSSL instead of LibreSSL installed on the target system. In that case, one must download [https://www.openssl.org/source/old/1.0.2/openssl-1.0.2.tar.gz](https://www.openssl.org/source/old/1.0.2/openssl-1.0.2.tar.gz) and follow the steps given below for older SSL versions. Using those versions is not recommended.
 Check the available SSL on the system:
-
+```
 openssl version
-
+```
 This will return something like:
-
+```
 LibreSSL 2.2.7
-
+```
 To install headers, download the first version having the same API (2.2.0 in the above case):
-
+```
 curl -L https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.0.tar.gz | tar -xf -
 cd libressl-2.2.0
 ./configure --prefix=$WORK
 cd include
 make install
 cd $WORK/src
-
+```
 Observe that only the C headers are installed. Clean the work space:
-
+```
 rm -rf libressl*
-
+```
 Alternatively, to install for the older SSL versions, download:
-
+```
 curl -L https://www.openssl.org/source/old/1.0.2/openssl-1.0.2.tar.gz | tar -xf -
-
+```
 Replace 1.0.2 with the version shown for your system (see above). Ignore the final letters (a-h, etc). Configuring is different than the standard UNIX way:
-
+```
 cd openssl-1.0.2
 ./Configure threads zlib-dynamic --prefix=$WORK darwin64-x86_64-cc
 cd include
 make install
 cd $WORK/src
-
+```
 Replace darwin64-x64_64-cc with the compiler options shown by Configure in case of error (the name changed between versions). If all is right, only the C headers are installed. Now clean the work space:
-
+```
 rm -rf openssl*
-
-Step 6. Install full SSL
+```
+### Step 6. Install full SSL
 
 This step mus be skipped by those using Step 5 above, otherwise version conflicts will appear. A newer SSL is strictly required by Python 3.7.X and LibreSSL works well.
 Download (version 2.7.4 for example):
