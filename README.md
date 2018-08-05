@@ -5,18 +5,22 @@
 The method presented below is a conventional way of installing software from source the way it's done on classical UNIX systems. It is used by the author of this text since the days of OS X 10.8 when a compatible API with the installed toolchain is required.
 This method is not using full Xcode (since it doesn't build an installer) but the Command Line Tools provided by Apple. These tools are already on the system for those having installed Xcode and a second download isn't required.
 
-Step 1. Obtaining Command Line Tools
+## Step 1. Obtaining Command Line Tools
 
 Check that clang or gcc (on macOS, gcc is only a frontend to clang) works, with the command:
 
+```
 clang -v
+```
 
 If the toolchain is installed, an informational message like the one below (taken on a current macOS) will show.
 
+```
 Apple LLVM version 9.1.0 (clang-902.0.39.2)
 Target: x86_64-apple-darwin17.7.0
 Thread model: posix
 InstalledDir: /Library/Developer/CommandLineTools/usr/bin
+```
 
 If no toolchain is installed, the command above will trigger a dialog requiring the installation of Xcode or Command Line Tools. Alternatively, the tools can be installed with the command:
 
