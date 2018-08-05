@@ -5,7 +5,7 @@
 The method presented below is a conventional way of installing software from source the way it's done on classical UNIX systems. It is used by the author of this text since the days of OS X 10.8 when a compatible API with the installed toolchain is required.
 This method is not using full Xcode (since it doesn't build an installer) but the Command Line Tools provided by Apple. These tools are already on the system for those having installed Xcode and a second download isn't required.
 
-**Note:** Observe the laws concerning the cryptography use before downloading and installing SSL, there are regions in the world where cryptography software is forbidden. Check with a lawyer which are your rights and restrictions before doing anything concerning cryptography. The author of this text is not liable for any violations you make. So be careful, it is your responsibility.
+**Note:** Observe the laws concerning cryptography in your country before downloading and installing SSL, there are regions in the world where cryptography software is forbidden. Check with a lawyer which are your rights and restrictions, the author of this text is not liable for any violations you make. So be careful, it is your responsibility.
 
 ## Step 1. Obtaining Command Line Tools
 
