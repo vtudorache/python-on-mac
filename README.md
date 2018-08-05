@@ -96,7 +96,7 @@ Observe the versioning of Tcl/Tk archive names: tcl or tk followed by the versio
 In the end, the subdirectories tcl8.6.8 and tk8.6.8 (the numbers may change according to the downloaded version) appear in the `$WORK/src` directory.
 Pay attention at download errors. If any error occurs, the source subdirectories will be partial and the download procedure must be done again.
 
-When building for 64 bits, the configuration option --enable-64bit can be added to Tcl and Tk, enabling large integers to be used.
+When building for 64 bits, the configuration option `--enable-64bit` can be added to Tcl and Tk, enabling large integers to be used.
 Configure and build Tcl:
 ```
 cd tcl8.6.8/unix
@@ -106,7 +106,7 @@ sudo mv /usr/local/bin/tclsh8.6 /Library/Frameworks/Tcl.framework/Versions/8.6
 sudo ln -sv ../../../Library/Frameworks/Tcl.framework/Versions/8.6/tclsh8.6 /usr/local/bin
 cd $WORK/src
 ```
-When not building for 64 bits, the option --enable-64bit must be removed. The NATIVE_TCLSH given with the installation command shows the installer which is the tclsh to use when building documentation. If this variable isn't set and no Tcl 8.6 is installed on the system, the HTML documentation step will fail.
+When not building for 64 bits, the option `--enable-64bit` must be removed. The NATIVE_TCLSH given with the installation command shows the installer which is the tclsh to use when building documentation. If this variable isn't set and no Tcl 8.6 is installed on the system, the HTML documentation step will fail.
 The last commands move the tclsh8.6 binary from `/usr/local/bin` to `/Library/Frameworks/Tcl.framework/Versions/8.6` and create a symbolic link to it in `/usr/local/bin` for consistency with system installed Tcl.
 Configure and build Tk:
 ```
@@ -181,105 +181,105 @@ rm -rf openssl*
 
 This step mus be skipped by those using Step 5 above, otherwise version conflicts will appear. A newer SSL is strictly required by Python 3.7.X and LibreSSL works well.
 Download (version 2.7.4 for example):
-
+```
 curl -L https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.7.4.tar.gz | tar -xf -
-
+```
 Then configure, build and install:
-
+```
 cd libressl-2.7.4
 ./configure --disable-shared --prefix=$WORK
 cd include
 make install
 cd $WORK/src
-
-Observe the --disable-shared option above: this makes the ssl python module independent of the ssl dynamic library which can be removed in the end.
+```
+Observe the `--disable-shared` option above: this makes the ssl python module independent of the ssl dynamic library which can be removed in the end.
 
 When using OpenSSL 1.1.0, follow the steps below:
-
+```
 curl -L https://www.openssl.org/source/old/1.1.0/openssl-1.1.0.tar.gz | tar -xf -
-
+```
 Replace 1.1.0 with the last version shown on the site. Configuring is different than the standard UNIX way:
-
+```
 cd openssl-1.1.0
 ./Configure no-shared threads zlib-dynamic --prefix=$WORK darwin64-x86_64-cc
 make -j2 && make install
 cd $WORK/src
-
-Replace darwin64-x64_64-cc with the compiler options shown by Configure in case of error (the name changed between versions). If all is right, only the C headers are installed. Now clean the work space:
-
+```
+Replace `darwin64-x64_64-cc` with the compiler options shown by Configure in case of error (the name changed between versions). If all is right, only the C headers are installed. Now clean the work space:
+```
 rm -rf openssl*
-
-Step 7. Install GDBM
+```
+## Step 7. Install GDBM
 
 Although not required, the dbm module will be complete after installing GDBM.
 Download and extract:
-
+```
 curl -L https://ftp.gnu.org/gnu/gdbm/gdbm-1.14.1.tar.gz | tar -xf -
-
+```
 Then configure, build and install (statically compiled version, without readline or nls as only the library will be used):
-
+```
 cd gdbm-1.14.1
 ./configure --disable-nls --disable-shared --prefix=$WORK --without-readline
 make -j2 && make install
 cd $WORK/src
-
+```
 Clean the work space:
-
+```
 rm -rf gdbm*
+```
+## Step 8. Install Python
 
-Step 8. Install Python
-
-When installing Python 3.7.X make sure the step 6 and not 5 was performed, otherwise the ssl module will not be built.
-The CFLAGS and CXXFLAGS are not needed any more, the configure script provided with Python will set them correctly when --with-universal-archs option is provided. Without this option, these flags will remain set.
+When installing Python 3.7.X make sure the step 6 and not 5 was performed, otherwise the `ssl` module will not be built.
+The `CFLAGS` and `CXXFLAGS` are not needed any more, the configure script provided with Python will set them correctly when `--with-universal-archs` option is provided. Without this option, these flags will remain set.
 To clear the compiler flags, write:
-
+```
 unset CFLAGS CXXFLAGS
-
-Set the variables I_TCLTK and L_TCLTK for the includes, respectively the libraries used when building tkinter. The names were chosen to not interfere with TCL_CFLAGS or TCL_LIBS which may be eventually set by the scripts. Write (example for 8.6):
-
+```
+Set the variables `I_TCLTK` and `L_TCLTK` for the includes, respectively the libraries used when building tkinter. The names were chosen to not interfere with `TCL_CFLAGS` or `TCL_LIBS` which may be eventually set by the scripts. Write (example for 8.6):
+```
 export I_TCLTK="-I/Library/Frameworks/Tcl.framework/Versions/8.6/Headers -I/Library/Frameworks/Tk.framework/Versions/8.6/Headers"
 export L_TCLTK="-L/Library/Frameworks/Tcl.framework/Versions/8.6 -L/Library/Frameworks/Tk.framework/Versions/8.6 -framework Tcl -framework Tk -ltclstub8.6 -ltkstub8.6 -framework CoreFoundation -lpthread -lz"
-
+```
 Now download, configure, build and install for Python 3.7.0:
-
+```
 curl -L https://www.python.org/ftp/python/3.7.0/Python-3.7.0.tar.xz | tar -xf -
 cd Python-3.7.0
 ./configure --enable-ipv6 --enable-framework --enable-optimizations --enable-universalsdk=/ --prefix=/usr/local --with-dtrace --with-ensurepip=upgrade --with-openssl=$WORK --with-tcltk-includes="$I_TCLTK" --with-tcltk-libs="$L_TCLTK" --with-universal-archs=intel-64
 make -j2
-
+```
 At this point, one can choose to write:
-
+```
 sudo make install
-
-That command installs all (including PythonLauncher.app and IDLE.app), links the framework version that was built to /Library/Frameworks/Python.framework/Versions/Current and creates links in /usr/local/bin for all the command-line python executables.
+```
+That command installs all (including PythonLauncher.app and IDLE.app), links the framework version that was built to `/Library/Frameworks/Python.framework/Versions/Current` and creates links in `/usr/local/bin` for all the command-line python executables.
 
 Another approach is to manually install only the framework. Write (without sudo):
-
+```
 make install DESTDIR=/private/tmp/python3
 cd /private/tmp/python3/Library/Frameworks/Python.framework/Versions
-
+```
 Now change the owner of the whole (-R for recursively) framework that was built (3.7 in the example):
-
+```
 sudo chown -R root:wheel 3.7
-
+```
 Then move the framework at its place (making sure the correct framework path exists with the first command):
-
+```
 sudo mkdir -p /Library/Frameworks/Python.framework/Versions 
 sudo mv 3.7 /Library/Frameworks/Python.framework/Versions
-
+```
 The built framework can be made default:
-
+```
 sudo ln -sf 3.7 /Library/Frameworks/Python.framework/Versions/Current
-
 sudo ln -sf Versions/Current/Headers /Library/Frameworks/Python.framework/Headers
 sudo ln -sf Versions/Current/Python /Library/Frameworks/Python.framework/Python
 sudo ln -sf Versions/Current/Resources /Library/Frameworks/Python.framework/Resources
-
+```
 To have python3 in the PATH, manually create links to /usr/local/bin as desired, or extend PATH in .bash_profile to include /Library/Frameworks/Python.framework/Versions/3.7/bin and that's all.
 
 Time for cleaning:
-
+```
 rm -rf /private/tmp/python3
 diskutil eject $WORK
-
+unset I_TCLTK L_TCLTK
+```
 With the last command, the volatile disk used for building disappears freeing RAM.
