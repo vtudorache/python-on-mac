@@ -1,4 +1,6 @@
-Foreword
+# Building Python from sources on recent macOS
+
+## Foreword
 
 The method presented below is a conventional way of installing software from source the way it's done on classical UNIX systems. It is used by the author of this text since the days of OS X 10.8 when a compatible API with the installed toolchain is required.
 This method is not using full Xcode (since it doesn't build an installer) but the Command Line Tools provided by Apple. These tools are already on the system for those having installed Xcode and a second download isn't required.
