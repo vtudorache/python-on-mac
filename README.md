@@ -49,25 +49,35 @@ diskutil eraseVolume HFS+ BUILD $(hdiutil attach -nomount ram://3145728)
 
 Otherwise, if there's not enough room in RAM, create a temporary folder:
 
+```
 mkdir /private/tmp/build
+```
 
 Now set an environment variable holding the path to this build root. It would be used throughout the process of building. 
 Pay attention to variable name conflicts. Variables like BUILD, DESTDIR, ARCH and others (see within the Makefile of each software built) are used by the building scripts, interfering with them can have unexpected results for the building process.
 For a RAM disk, write:
 
+```
 export WORK=/Volumes/BUILD
+```
 
 Alternatively, for a directory on the disk, write:
 
+```
 export WORK=/private/tmp/build
+```
 
 Make a subdirectory for sources:
 
+```
 mkdir -v $WORK/src
+```
 
 Set the compiler program(s) and flags. 
 
+```
 export CC=clang CXX=clang++
+```
 
 By default, clang or gcc will target the machine's architecture as retrieved with the command uname -m in the terminal. In order to obtain dual-architecture ("fat") binaries write the command below:
 
