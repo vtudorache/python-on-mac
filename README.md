@@ -8,32 +8,24 @@ This method is not using full Xcode (since it doesn't build an installer) but th
 ## Step 1. Obtaining Command Line Tools
 
 Check that clang or gcc (on macOS, gcc is only a frontend to clang) works, with the command:
-
 ```
 clang -v
 ```
-
 If the toolchain is installed, an informational message like the one below (taken on a current macOS) will show.
-
 ```
 Apple LLVM version 9.1.0 (clang-902.0.39.2)
 Target: x86_64-apple-darwin17.7.0
 Thread model: posix
 InstalledDir: /Library/Developer/CommandLineTools/usr/bin
 ```
-
 If no toolchain is installed, the command above will trigger a dialog requiring the installation of Xcode or Command Line Tools. Alternatively, the tools can be installed with the command:
-
 ```
 xcode-select --install
 ```
-
 If the tools are already installed, the following message will show:
-
 ```
 xcode-select: error: command line tools are already installed, use "Software Update" to install updates
 ```
-
 Once the compilation tools are installed, prepare the environment for building.
 
 ## Step 2. Preparing the environment
@@ -42,71 +34,59 @@ For speed reasons (and for protecting the SSD), the author of this text does the
 The remaining memory for the OS and applications must be at least 2 GB, so for those not having enough RAM installed (4 GB at least), a directory on disk must be used instead. The size of the RAM disk can't be reduced too much, otherwise several Python tests will fail (at the testing phase).
 
 If there's enough space for a RAM disk, the following command will create a 1.5 GB RAM disk and mount it at /Volumes/BUILD (the icon of the mounted volume will show on desktop):
-
 ```
 diskutil eraseVolume HFS+ BUILD $(hdiutil attach -nomount ram://3145728)
 ```
-
 Otherwise, if there's not enough room in RAM, create a temporary folder:
-
 ```
 mkdir /private/tmp/build
 ```
-
 Now set an environment variable holding the path to this build root. It would be used throughout the process of building. 
 Pay attention to variable name conflicts. Variables like BUILD, DESTDIR, ARCH and others (see within the Makefile of each software built) are used by the building scripts, interfering with them can have unexpected results for the building process.
 For a RAM disk, write:
-
 ```
 export WORK=/Volumes/BUILD
 ```
-
 Alternatively, for a directory on the disk, write:
-
 ```
 export WORK=/private/tmp/build
 ```
-
 Make a subdirectory for sources:
-
 ```
 mkdir -v $WORK/src
 ```
-
 Set the compiler program(s) and flags. 
-
 ```
 export CC=clang CXX=clang++
 ```
-
 By default, clang or gcc will target the machine's architecture as retrieved with the command uname -m in the terminal. In order to obtain dual-architecture ("fat") binaries write the command below:
-
+```
 export CFLAGS="-arch i386 -arch x86_64"
 export CXXFLAGS="$CFLAGS"
-
+```
 Make subdirectories for C header files and library files within the working root directory:
-
+```
 mkdir -v $WORK/{include,lib}
-
+```
 Then add the created subdirectories to the C/CXX preprocessor's flags and linker's flags respectively. This is required for the tools to find the include files and compiled libraries:
-
+```
 export CPPFLAGS="-I$WORK/include" LDFLAGS="-L$WORK/lib"
-
+```
 Set the minimal macOS version to target, for example:
-
+```
 export MACOSX_DEPLOYMENT_TARGET=10.13
-
+```
 If this variable is not set, the resulting binaries will target the current macOS version. For each of the steps below, make sure the initial directory is $WORK/src (before downloading and building).
 
-Step 3. Install Tcl/Tk
+## Step 3. Install Tcl/Tk
 
 This step may be skipped by those not installing the tkinter module or by those already having the desired version of Tcl/Tk installed on their systems.
 Pay attention that this method installs Tcl/Tk system-wide. A contained install guide will be added to this text if required.
 
 Change to the sources directory:
-
+```
 cd $WORK/src
-
+```
 Download Tcl/Tk from https://downloads.sourceforge.net/tcl using the curl command available by default on macOS. The download and extract steps can be performed in a single operation:
 
 curl -L https://downloads.sourceforge.net/tcl/tcl8.6.8-src.tar.gz | tar -xf -
