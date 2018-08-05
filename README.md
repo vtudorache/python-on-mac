@@ -59,7 +59,7 @@ Set the compiler program(s) and flags.
 ```
 export CC=clang CXX=clang++
 ```
-By default, clang or gcc will target the machine's architecture as retrieved with the command uname -m in the terminal. In order to obtain dual-architecture ("fat") binaries write the command below:
+By default, clang or gcc will target the machine's architecture as retrieved with the command `uname -m` in the terminal. In order to obtain dual-architecture ("fat") binaries write the command below:
 ```
 export CFLAGS="-arch i386 -arch x86_64"
 export CXXFLAGS="$CFLAGS"
@@ -76,7 +76,7 @@ Set the minimal macOS version to target, for example:
 ```
 export MACOSX_DEPLOYMENT_TARGET=10.13
 ```
-If this variable is not set, the resulting binaries will target the current macOS version. For each of the steps below, make sure the initial directory is $WORK/src (before downloading and building).
+If this variable is not set, the resulting binaries will target the current macOS version. For each of the steps below, make sure the initial directory is `$WORK/src` (before downloading and building).
 
 ## Step 3. Install Tcl/Tk
 
@@ -87,7 +87,7 @@ Change to the sources directory:
 ```
 cd $WORK/src
 ```
-Download Tcl/Tk from https://downloads.sourceforge.net/tcl using the curl command available by default on macOS. The download and extract steps can be performed in a single operation:
+Download Tcl/Tk from [https://downloads.sourceforge.net/tcl](https://downloads.sourceforge.net/tcl) using the curl command available by default on macOS. The download and extract steps can be performed in a single operation:
 
 curl -L https://downloads.sourceforge.net/tcl/tcl8.6.8-src.tar.gz | tar -xf -
 curl -L https://downloads.sourceforge.net/tcl/tk8.6.8-src.tar.gz | tar -xf -
