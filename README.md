@@ -2,52 +2,53 @@
 
 ## Foreword
 
-The method presented below is a conventional way of installing software from source the way it's done on classical UNIX systems. It is used by the author of this text since the days of OS X 10.8 when a compatible API with the installed toolchain is required.
-This method is not using full Xcode (since it doesn't build an installer) but the Command Line Tools provided by Apple. These tools are already on the system for those having installed Xcode and a second download isn't required.
+The method presented below is a classical UNIX way of installing software from source. It is used by the author of this text since the days of OS X 10.8 when an API compatible with the installed toolchain is required.
+This method is not using full Xcode (since it doesn't build an installer) but the _Command Line Tools_ as provided by Apple. These tools are already on the system for those having installed Xcode and a second download isn't required.
 
-**Note:** Observe the laws concerning cryptography in your country before downloading and installing SSL, there are regions in the world where cryptography software is forbidden. Check with a lawyer which are your rights and restrictions, the author of this text is not liable for any violations you make. So be careful, it is your responsibility.
+**Note:** Observe the laws concerning cryptography in your country before downloading and installing SSL, there are regions in the world where cryptography software is forbidden. Observe with a lawyer which are your rights and/or restrictions, I'm not liable for any violations you make. Be careful, it's **your** responsibility.
 
 ## Step 1. Obtaining Command Line Tools
 
 Check that clang or gcc (on macOS, gcc is only a frontend to clang) works, with the command:
-```
+```sh
 clang -v
 ```
-If the toolchain is installed, an informational message like the one below (taken on a current macOS) will show.
-```
+If the toolchain is installed, an informational message like the one below (taken on a recent macOS) will be shown.
+```sh
 Apple LLVM version 9.1.0 (clang-902.0.39.2)
 Target: x86_64-apple-darwin17.7.0
 Thread model: posix
 InstalledDir: /Library/Developer/CommandLineTools/usr/bin
 ```
 If no toolchain is installed, the command above will trigger a dialog requiring the installation of Xcode or Command Line Tools. Alternatively, the tools can be installed with the command:
-```
+```sh
 xcode-select --install
 ```
-If the tools are already installed, the following message will show:
-```
+If the tools are already installed, the following message will be displayed:
+```sh
 xcode-select: error: command line tools are already installed, use "Software Update" to install updates
 ```
 Once the compilation tools are installed, prepare the environment for building.
 
 ## Step 2. Preparing the environment
 
-For speed reasons (and for protecting the SSD), the author of this text does the build on a RAM disk. A size of 1.5 GB will be enough.
-The remaining memory for the OS and applications must be at least 2 GB, so for those not having enough RAM installed (4 GB at least), a directory on disk must be used instead. The size of the RAM disk can't be reduced too much, otherwise several Python tests will fail (at the testing phase).
+For speed reasons (and for protecting the SSD), I do the build on a RAM disk. A size of 1.5 GB will be enough.
+The memory left for the OS and the running applications must be at least 2 GB, so for those not having enough RAM installed (4 GB at least), a directory on the physical disk must be used instead. The size of the RAM disk can't be reduced too much, otherwise several Python tests will fail (at the post-build phase).
 
-If there's enough space for a RAM disk, the following command will create a 1.5 GB RAM disk and mount it at /Volumes/BUILD (the icon of the mounted volume will show on desktop):
+If there's enough space for a RAM disk, the following command will create a 1.5 GB RAM disk and mount it at /Volumes/PYBUILD (the icon of the mounted volume will show on desktop):
 ```
-diskutil eraseVolume HFS+ BUILD $(hdiutil attach -nomount ram://3145728)
+diskutil eraseVolume HFS+ PYBUILD $(hdiutil attach -nomount ram://3145728)
 ```
 Otherwise, if there's not enough room in RAM, create a temporary folder:
 ```
 mkdir /private/tmp/build
 ```
 Now set an environment variable holding the path to this build root. It would be used throughout the process of building. 
-Pay attention to variable name conflicts. Variables like BUILD, DESTDIR, ARCH and others (see within the Makefile of each software built) are used by the building scripts, interfering with them can have unexpected results for the building process.
+Pay attention to environment variable name conflicts. Variables like BUILD, DESTDIR, ARCH and others (look inside the Makefile of each software built) are used by many building scripts, interfering with them can have unexpected results for the building process.
+
 For a RAM disk, write:
 ```
-export WORK=/Volumes/BUILD
+export WORK=/Volumes/PYBUILD
 ```
 Alternatively, for a directory on the disk, write:
 ```
@@ -61,7 +62,7 @@ Set the compiler program(s) and flags.
 ```
 export CC=clang CXX=clang++
 ```
-By default, clang or gcc will target the machine's architecture as retrieved with the command `uname -m` in the terminal. In order to obtain dual-architecture ("fat") binaries write the command below:
+By default, clang or gcc will target the machine's architecture as retrieved with the command `uname -m` in the terminal. Current versions of macOS support only 64 bit machines. In order to obtain dual-architecture (_fat_) binaries write the command below:
 ```
 export CFLAGS="-arch i386 -arch x86_64"
 export CXXFLAGS="$CFLAGS"
@@ -76,32 +77,32 @@ export CPPFLAGS="-I$WORK/include" LDFLAGS="-L$WORK/lib"
 ```
 Set the minimal macOS version to target, for example:
 ```
-export MACOSX_DEPLOYMENT_TARGET=10.13
+export MACOSX_DEPLOYMENT_TARGET=10.12
 ```
 If this variable is not set, the resulting binaries will target the current macOS version. For each of the steps below, make sure the initial directory is `$WORK/src` (before downloading and building).
 
 ## Step 3. Install Tcl/Tk
 
 This step may be skipped by those not installing the tkinter module or by those already having the desired version of Tcl/Tk installed on their systems.
-Pay attention that this method installs Tcl/Tk system-wide. A contained install guide will be added to this text if required.
+Pay attention that this method installs Tcl/Tk system-wide. Pay also attention at the Tcl/Tk version, there have been issues with Tk since the _dark mode_ of macOS was introduced. With Tcl/Tk 8.6.10 all seems right, I didn't notice serious issues.
 
-Change to the sources directory:
+Now change to the sources directory:
 ```
 cd $WORK/src
 ```
 Download Tcl/Tk from [https://downloads.sourceforge.net/tcl](https://downloads.sourceforge.net/tcl) using the curl command available by default on macOS. The download and extract steps can be performed in a single operation:
 ```
-curl -L https://downloads.sourceforge.net/tcl/tcl8.6.8-src.tar.gz | tar -xf -
-curl -L https://downloads.sourceforge.net/tcl/tk8.6.8-src.tar.gz | tar -xf -
+curl -L https://downloads.sourceforge.net/tcl/tcl8.6.10-src.tar.gz | tar -xf -
+curl -L https://downloads.sourceforge.net/tcl/tk8.6.10-src.tar.gz | tar -xf -
 ```
 Observe the versioning of Tcl/Tk archive names: tcl or tk followed by the version and then followed by -src.tar.gz (to download 8.5.18, for example, the archive names will be tcl8.5.18-src.tar.gz and tk8.5.18-src.tar.gz).
-In the end, the subdirectories tcl8.6.8 and tk8.6.8 (the numbers may change according to the downloaded version) appear in the `$WORK/src` directory.
-Pay attention at download errors. If any error occurs, the source subdirectories will be partial and the download procedure must be done again.
+In the end, the subdirectories tcl8.6.10 and tk8.6.10 (the numbers may change according to the downloaded version) appear in the `$WORK/src` directory.
+Pay attention at download errors. If any error occurs, the source subdirectories will be partial. Delete the partially downloaded sources then repeat the download command(s) shown above.
 
 When building for 64 bits, the configuration option `--enable-64bit` can be added to Tcl and Tk, enabling large integers to be used.
 Configure and build Tcl:
 ```
-cd tcl8.6.8/unix
+cd tcl8.6.10/unix
 ./configure --enable-64bit --enable-dtrace --enable-framework --enable-threads --mandir=/usr/local/share/man --prefix=/usr/local --with-encoding="utf-8"
 make -j2 && sudo make NATIVE_TCLSH=/usr/local/bin/tclsh8.6 install
 sudo mv /usr/local/bin/tclsh8.6 /Library/Frameworks/Tcl.framework/Versions/8.6
