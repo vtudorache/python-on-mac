@@ -25,7 +25,7 @@ If no toolchain is installed, the command above will trigger a dialog requiring 
 xcode-select --install
 ```
 If the tools are already installed, the following message will be displayed:
-```sh
+```
 xcode-select: error: command line tools are already installed, use "Software Update" to install updates
 ```
 Once the compilation tools are installed, prepare the environment for building.
@@ -36,47 +36,47 @@ For speed reasons (and for protecting the SSD), I do the build on a RAM disk. A 
 The memory left for the OS and the running applications must be at least 2 GB, so for those not having enough RAM installed (4 GB at least), a directory on the physical disk must be used instead. The size of the RAM disk can't be reduced too much, otherwise several Python tests will fail (at the post-build phase).
 
 If there's enough space for a RAM disk, the following command will create a 1.5 GB RAM disk and mount it at /Volumes/PYBUILD (the icon of the mounted volume will show on desktop):
-```
+```sh
 diskutil eraseVolume HFS+ PYBUILD $(hdiutil attach -nomount ram://3145728)
 ```
 Otherwise, if there's not enough room in RAM, create a temporary folder:
-```
+```sh
 mkdir /private/tmp/build
 ```
 Now set an environment variable holding the path to this build root. It would be used throughout the process of building. 
 Pay attention to environment variable name conflicts. Variables like BUILD, DESTDIR, ARCH and others (look inside the Makefile of each software built) are used by many building scripts, interfering with them can have unexpected results for the building process.
 
 For a RAM disk, write:
-```
+```sh
 export WORK=/Volumes/PYBUILD
 ```
 Alternatively, for a directory on the disk, write:
-```
+```sh
 export WORK=/private/tmp/build
 ```
 Make a subdirectory for sources:
-```
+```sh
 mkdir -v $WORK/src
 ```
 Set the compiler program(s) and flags. 
-```
+```sh
 export CC=clang CXX=clang++
 ```
 By default, clang or gcc will target the machine's architecture as retrieved with the command `uname -m` in the terminal. Current versions of macOS support only 64 bit machines. In order to obtain dual-architecture (_fat_) binaries write the command below:
-```
+```sh
 export CFLAGS="-arch i386 -arch x86_64"
 export CXXFLAGS="$CFLAGS"
 ```
 Make subdirectories for C header files and library files within the working root directory:
-```
+```sh
 mkdir -v $WORK/{include,lib}
 ```
 Then add the created subdirectories to the C/CXX preprocessor's flags and linker's flags respectively. This is required for the tools to find the include files and compiled libraries:
-```
+```sh
 export CPPFLAGS="-I$WORK/include" LDFLAGS="-L$WORK/lib"
 ```
 Set the minimal macOS version to target, for example:
-```
+```sh
 export MACOSX_DEPLOYMENT_TARGET=10.12
 ```
 If this variable is not set, the resulting binaries will target the current macOS version. For each of the steps below, make sure the initial directory is `$WORK/src` (before downloading and building).
@@ -87,11 +87,11 @@ This step may be skipped by those not installing the tkinter module or by those 
 Pay attention that this method installs Tcl/Tk system-wide. Pay also attention at the Tcl/Tk version, there have been issues with Tk since the _dark mode_ of macOS was introduced. With Tcl/Tk 8.6.10 all seems right, I didn't notice serious issues.
 
 Now change to the sources directory:
-```
+```sh
 cd $WORK/src
 ```
 Download Tcl/Tk from [https://downloads.sourceforge.net/tcl](https://downloads.sourceforge.net/tcl) using the curl command available by default on macOS. The download and extract steps can be performed in a single operation:
-```
+```sh
 curl -L https://downloads.sourceforge.net/tcl/tcl8.6.10-src.tar.gz | tar -xf -
 curl -L https://downloads.sourceforge.net/tcl/tk8.6.10-src.tar.gz | tar -xf -
 ```
@@ -101,7 +101,7 @@ Pay attention at download errors. If any error occurs, the source subdirectories
 
 When building for 64 bits, the configuration option `--enable-64bit` can be added to Tcl and Tk, enabling large integers to be used.
 Configure and build Tcl:
-```
+```sh
 cd tcl8.6.10/unix
 ./configure --enable-64bit --enable-dtrace --enable-framework --enable-threads --mandir=/usr/local/share/man --prefix=/usr/local --with-encoding="utf-8"
 make -j2 && sudo make NATIVE_TCLSH=/usr/local/bin/tclsh8.6 install
@@ -109,11 +109,11 @@ sudo mv /usr/local/bin/tclsh8.6 /Library/Frameworks/Tcl.framework/Versions/8.6
 sudo ln -sv ../../../Library/Frameworks/Tcl.framework/Versions/8.6/tclsh8.6 /usr/local/bin
 cd $WORK/src
 ```
-When not building for 64 bits, the option `--enable-64bit` must be removed. The NATIVE_TCLSH given with the installation command shows the installer which is the tclsh to use when building documentation. If this variable isn't set and no Tcl 8.6 is installed on the system, the HTML documentation step will fail.
+When not building for 64 bits, the option `--enable-64bit` must be removed. The NATIVE_TCLSH given with the installation command points the installer to the `tclsh` to use when building documentation. If this variable isn't set and no Tcl 8.6 is installed on the system, the HTML documentation building will fail.
 The last commands move the tclsh8.6 binary from `/usr/local/bin` to `/Library/Frameworks/Tcl.framework/Versions/8.6` and create a symbolic link to it in `/usr/local/bin` for consistency with system installed Tcl.
 Configure and build Tk:
-```
-cd tk8.6.8/unix
+```sh
+cd tk8.6.10/unix
 ./configure --enable-64bit --enable-aqua --enable-framework --enable-threads --mandir=/usr/local/share/man --prefix=/usr/local --without-x
 make -j2 && sudo make install
 cd $WORK/src
@@ -121,13 +121,13 @@ cd $WORK/src
 There is no need of NATIVE_TCLSH, as there's certainly a tclsh8.6 previously installed.
 
 Clean the work space:
-```
+```sh
 rm -rf tcl* tk*
 ```
 ## Step 4. Install XZ (LZMA) headers
 
 The LZMA library is already available on the system, but there are no C headers available. Download an API-compatible XZ and install headers with the $WORK prefix.
-```
+```sh
 curl -L https://sourceforge.net/projects/lzmautils/files/xz-5.0.0.tar.gz | tar -xf -
 cd xz-5.0.0
 ./configure --disable-nls --prefix=$WORK
@@ -136,13 +136,13 @@ make install
 cd $WORK/src
 ```
 Observe that only the C headers are installed. Clean the work space:
-```
+```sh
 rm -rf xz*
 ```
 ## Step 5. Install SSL headers
 
-This step must be skipped by those installing Python 3.7.X because a full SSL install is needed in this case (the SSL library available on macOS is too old). For Python 3.6.X and lower versions, the case of LZMA repeats. The libraries are available, but no C headers are found.
-Pay attention when compiling for older OS versions, there could be old versions of OpenSSL instead of LibreSSL installed on the target system. In that case, one must download [https://www.openssl.org/source/old/1.0.2/openssl-1.0.2.tar.gz](https://www.openssl.org/source/old/1.0.2/openssl-1.0.2.tar.gz) and follow the steps given below for older SSL versions. Using those versions is not recommended.
+This step must be skipped by those installing Python 3.7.X because a full SSL install is needed in this case (the SSL library available on macOS is too old). For Python 3.6.X and lower versions, the case of LZMA repeats. The libraries are available, but no C headers are found. Recent versions of Python need OpenSSL, not LibreSSL.
+Pay also attention when compiling for older OS versions, there could be old versions of OpenSSL instead of LibreSSL installed on the target system. In that case, one must download [https://www.openssl.org/source/old/1.0.2/openssl-1.0.2.tar.gz](https://www.openssl.org/source/old/1.0.2/openssl-1.0.2.tar.gz) and follow the steps given below for older SSL versions. Using those versions is not recommended.
 Check the available SSL on the system:
 ```
 openssl version
@@ -182,7 +182,7 @@ rm -rf openssl*
 ```
 ### Step 6. Install full SSL
 
-This step mus be skipped by those using Step 5 above, otherwise version conflicts will appear. A newer SSL is strictly required by Python 3.7.X and LibreSSL works well.
+This step mus be skipped by those using Step 5 above, otherwise version conflicts will appear. A newer SSL is strictly required by Python 3.7.X and LibreSSL doesn't work with recent Python versions.
 Download (version 2.7.4 for example):
 ```
 curl -L https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.7.4.tar.gz | tar -xf -
